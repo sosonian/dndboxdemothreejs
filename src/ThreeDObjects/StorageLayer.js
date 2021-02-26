@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { Geometry } from 'three';
+//import { BufferGeometry } from 'three';
 
 class StorageLayerOutline {
     constructor(){
@@ -8,7 +8,7 @@ class StorageLayerOutline {
         this.v3 = new THREE.Vector3(3.5,0,-3.5)
         this.v4 = new THREE.Vector3(3.5,0,3.5)
 
-        this.layout = new THREE.Geometry()
+        this.layout = new THREE.BufferGeometry()
         this.layout.vertices.push(this.v1, this.v2, this.v3, this.v4)
         
         let color = new THREE.Color(0xffaa00)
