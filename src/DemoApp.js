@@ -3,21 +3,24 @@ import * as THREE from 'three';
 import orbControls from './OrbitControls';
 import Stats from 'stats.js';
 import {DnDContainer, DnDBackgroundComponent, DnDLayout} from 'dnd-box'
-import { CSS3DRenderer, CSS3DObject } from './Utilities/CSS3DRenderer';
-
-
-
 
 class DemoApp extends Component{
     constructor(props) {
         super(props)
-        this.state = {
+        this.state={
+            frontViewSize:{
+                w:null,
+                h:null
+            },
+            sideViewSize:{
+                w:null,
+                h:null
+            }
         }
     }
 
-    componentDidMount(){
+    componentDidMount(){     
         this.deployState();
-        this.frustumSize = 500
         const aspect = 1920 / 800;
 		this.camera1 = new THREE.PerspectiveCamera( 
             100,
@@ -36,9 +39,12 @@ class DemoApp extends Component{
         this.sceneGrid = new THREE.GridHelper(50,50)
         this.scene.add(this.sceneGrid)
 
+        
+
         this.camera2 = new THREE.PerspectiveCamera(
             70,
-            200 / 200,
+            200 /200,
+            //this.frontView.clientWidth / this.frontView.clientHeight,
             0.1,
             1000
         )
@@ -48,6 +54,8 @@ class DemoApp extends Component{
         this.camera2.lookAt(0,0,0)
         this.renderer2 = new THREE.WebGLRenderer()
         this.renderer2.setClearColor(0xeeeeee, 1.0) 
+        //this.renderer2.setSize(this.frontView.clientWidth, this.frontView.clientHeight);
+        //this.frontView.appendChild( this.renderer2.domElement );
 
 
         this.orbitControlSet()
@@ -56,8 +64,12 @@ class DemoApp extends Component{
     }
 
     componentDidUpdate(preProps, preState){
-    
-       
+        if(preState.frontViewSize !== this.state.frontViewSize && this.frontView)
+        {
+            //console.log(this.frontView.parentElement)
+            this.renderer2.setSize(this.state.frontViewSize.w-1, this.state.frontViewSize.h-1)
+            this.frontView.appendChild( this.renderer2.domElement )
+        }
     }
 
     componentWillUnmount() {
@@ -65,20 +77,41 @@ class DemoApp extends Component{
 
     deployState = () => {
         this.stats = new Stats()
-        this.stats.setMode(0) // FPS mode
-        this.stats.domElement.style.position = 'absolute'
+        this.stats.setMode(0)
+        this.stats.domElement.style.position = 'absolute'  
         this.mainBody.appendChild(this.stats.domElement)
+        
+        
     }
 
     animate=()=>{
-        //console.log("DemoApp animate")
-        //console.log(this.mesh.rotation.x)
+        if(this.frontView)
+        {
+            if(this.frontView.clientWidth !== this.state.frontViewSize.w || this.frontView.clientHeight !== this.state.frontViewSize.h)
+            {
+                this.setState({
+                    frontViewSize:{
+                        w:this.frontView.clientWidth,
+                        h:this.frontView.clientHeight
+                    }
+                })
+            }
+        }
+        else
+        {
+            this.setState({
+                frontViewSize:{
+                    w:null,
+                    h:null
+                }
+            })
+
+        }
+
         this.stats.begin();
-        //let c1Background = new THREE.Color('rgb(255,255,255)')
-        //this.renderer.setClearColor(c1Background)
         this.renderer.render(this.scene, this.camera1)
+        this.renderer2.render(this.scene, this.camera2)
         this.mesh.rotation.x += 0.01
-        //this.renderer2.render(this.scene2, this.camera );
         this.stats.end();
         window.requestAnimationFrame(this.animate)
     }
@@ -98,9 +131,17 @@ class DemoApp extends Component{
 
     onClick=()=>{
         console.log("THREE Scene be clicked !")
+        this.setState({
+            testCount:this.state.testCount + 1
+        })
+    }
+
+    sideOnClick=()=>{
+        console.log("frontView be clicked !")
     }
 
     render(){
+       
         console.log("DemoApp render")
         let boxesSetting=[
             {
@@ -147,31 +188,31 @@ class DemoApp extends Component{
                         <div onClick={this.onClick} ref={(mount) => { this.mount = mount }}>
                         </div>
                     </DnDBackgroundComponent>
-                    <DnDContainer containerTabTitle={"front view"} containerID={1} boxID={'A'}>
-                        <div ref={(frontView) => { this.frontView = frontView }}>
-                            {"front view"}
+                    <DnDContainer containerTabTitle={"Front View"} containerID={1} boxID={'A'}>
+                        <div style={{width:'100%',height:'100%',overflow:'hidden'}} ref={(frontView) => { this.frontView = frontView }}>
                         </div>
                     </DnDContainer>
-                    <DnDContainer containerTabTitle={"side view"} containerID={2} boxID={'B'}>
-                        <div ref={(frontView) => { this.frontView = frontView }}>
-                            {"side view"}
+                    <DnDContainer containerTabTitle={"Side View"} containerID={2} boxID={'B'}>
+                        <div ref={(sideView) => { this.sideView = sideView }}>              
+                            {"side view"}                   
                         </div>
                     </DnDContainer>
-                    <DnDContainer containerTabTitle={"top view"} containerID={3} boxID={'C'}>
+                    <DnDContainer containerTabTitle={"Top View"} containerID={3} boxID={'C'}>
                         <div>
                             {"top view"}
                         </div>
                     </DnDContainer>
-                    <DnDContainer containerTabTitle={"rotation speed"} containerID={3} boxID={'D'}>
+                    <DnDContainer containerTabTitle={"Rotation Speed"} containerID={3} boxID={'D'}>
                         <div>
                             {"rotation speed"}
                         </div>
                     </DnDContainer>
-                    <DnDContainer containerTabTitle={"info"} containerID={5} boxID={'D'}>
+                    <DnDContainer containerTabTitle={"Obj Info"} containerID={5} boxID={'D'}>
                         <div>
                             {"info"}
                         </div>
                     </DnDContainer>
+                
                 </DnDLayout>
             </div>
         )
