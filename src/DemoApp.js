@@ -31,7 +31,8 @@ class DemoApp extends Component{
                 x:0,
                 y:0.01,
                 z:0
-            }
+            },
+            selectedObjID:null
         }
     }
 
@@ -99,7 +100,6 @@ class DemoApp extends Component{
 
         this.cameraControl1 = new orbControls(this.camera1,this.renderer.domElement)
         this.animate()
-        
     }
 
     componentDidUpdate(preProps, preState){
@@ -259,11 +259,13 @@ class DemoApp extends Component{
             case 1:
                 this.mesh1 = new THREE.Mesh( geometry, material );
 		        this.mesh1.position.copy( pos );
+                this.mesh1.name = 'plain1'
 		        this.scene.add( this.mesh1 );
                 break
             case 2:
                 this.mesh2 = new THREE.Mesh( geometry, material );
 		        this.mesh2.position.copy( pos );
+                this.mesh2.name = 'plain2'
 		        this.scene.add( this.mesh2 );
                 break
         }	
@@ -274,6 +276,68 @@ class DemoApp extends Component{
         this.setState({
             testCount:this.state.testCount + 1
         })
+    }
+
+    threeDLayerMouseDown=(e)=>{
+        let result = this.detectObjectSelectedOrNot(e)
+        if(result && this.state.selectedObjID === result.name)
+        {
+            this.selectedObjectPaintedOrNot(result,false)
+        }
+        else if(result && this.state.selectedObjID !== result.name)
+        {
+            this.selectedObjectPaintedOrNot(result,true)
+            {
+                this.setState({
+                    selectedObjID:result.name
+                })
+            }
+        }
+        else
+        {
+            this.setState({
+                selectedObjID:null
+            })
+        }
+        console.log(result)
+    }
+
+    detectObjectSelectedOrNot=(e)=>{
+        const rayCaster = new THREE.Raycaster()
+        const mouseToken = new THREE.Vector2()
+        this.rect = this.mount.getBoundingClientRect()
+        mouseToken.x = ((e.clientX-this.rect.left)/this.mount.clientWidth)*2-1
+        mouseToken.y = -((e.clientY-this.rect.top)/this.mount.clientHeight)*2+1
+        rayCaster.setFromCamera(mouseToken, this.camera1)
+    
+        let intersects = rayCaster.intersectObjects(this.scene.children)
+        
+        if(intersects.length>0)
+        {
+            for(var i =0; i <intersects.length; i++)
+            {
+                if(intersects[i].object.type == 'Mesh')
+                {
+                    return intersects[i].object
+                }   
+            }
+        }
+        else
+        {
+            return null
+        }
+    }
+
+    selectedObjectPaintedOrNot(object3D,toggle)
+    {
+        if(toggle)
+        {
+            object3D.material.color.set(0x13D73F)
+        }
+        else
+        {
+            object3D.material.color.set(0x0000ff)
+        }
     }
 
     sideOnClick=()=>{
@@ -350,7 +414,7 @@ class DemoApp extends Component{
         ]
 
         return(
-            <div ref={(mainBody)=>{this.mainBody = mainBody}} style={{border:"1px solid black"}}>
+            <div ref={(mainBody)=>{this.mainBody = mainBody}} style={{border:"1px solid black"}}  onMouseDown={this.threeDLayerMouseDown}>
                 <DnDLayout backgroundColor={'pink'} width={1920} height={800} boxColor={''} boxHeaderColor={''} boxTabColor={''} boxHeaderHoverColor={''} boxTabHoverColor={''} boxTabSelectedColor={''} iconHoverColor={''} boxTabRadius={'0px 10px 0px 0px'} boxesSetting={boxesSetting} openContainer={this.state.showContainer}  tabHeight={25} getBoxesState={this.getBoxesState}>
                     <DnDBackgroundComponent>
                         <div onClick={this.onClick} ref={(mount) => { this.mount = mount }}>
