@@ -277,14 +277,9 @@ class DemoApp extends Component{
         }	
     }
 
-    onClick=()=>{
-        console.log("THREE Scene be clicked !")
-        this.setState({
-            testCount:this.state.testCount + 1
-        })
-    }
-
     threeDLayerMouseDown=(e)=>{
+        //e.preventDefault()
+        //e.stopPropagation()
         let result = this.detectObjectSelectedOrNot(e)
         if(result && this.state.selectedObjInfo.name === result.name)
         {
@@ -457,7 +452,7 @@ class DemoApp extends Component{
             <div ref={(mainBody)=>{this.mainBody = mainBody}} style={{border:"1px solid black"}}  onMouseDown={this.threeDLayerMouseDown}>
                 <DnDLayout backgroundColor={'pink'} width={1920} height={800} boxColor={''} boxHeaderColor={''} boxTabColor={''} boxHeaderHoverColor={''} boxTabHoverColor={''} boxTabSelectedColor={''} iconHoverColor={''} boxTabRadius={'0px 10px 0px 0px'} boxesSetting={boxesSetting} openContainer={this.state.showContainer}  tabHeight={25} getBoxesState={this.getBoxesState}>
                     <DnDBackgroundComponent>
-                        <div onClick={this.onClick} ref={(mount) => { this.mount = mount }}>
+                        <div ref={(mount) => { this.mount = mount }}>
                         </div>
                     </DnDBackgroundComponent>
                     <DnDContainer containerTabTitle={"Front View"} containerID={1} boxID={'A'}>
