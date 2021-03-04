@@ -5,6 +5,7 @@ import Stats from 'stats.js';
 import {DnDContainer, DnDBackgroundComponent, DnDLayout} from 'dnd-box'
 import OrbitControls from './OrbitControls';
 import RotationMenu from './RotationMenu'
+import SelectedObjInfo from './SelectedObjInfo'
 
 class DemoApp extends Component{
     constructor(props) {
@@ -32,7 +33,12 @@ class DemoApp extends Component{
                 y:0.01,
                 z:0
             },
-            selectedObjID:null
+            selectedObjInfo:{
+                name:null,
+                type:null,
+                position:null,
+                scale:null
+            }
         }
     }
 
@@ -49,7 +55,7 @@ class DemoApp extends Component{
         this.camera1.position.set( - 20, 20, 20 );
 		this.scene.background = new THREE.Color( 0xf0f0f0 );
         this.createPlane(1, 20, 20,'chocolate',new THREE.Vector3( -20, 10, 0 ),new THREE.Euler( 0, - 90 * THREE.MathUtils.DEG2RAD, 0 ))
-        this.createPlane(2, 20, 20,'chocolate',new THREE.Vector3( 20, 10, 0 ),new THREE.Euler( 0, - 90 * THREE.MathUtils.DEG2RAD, 0 ))
+        this.createPlane(2, 10, 10,'chocolate',new THREE.Vector3( 20, 10, 0 ),new THREE.Euler( 0, - 90 * THREE.MathUtils.DEG2RAD, 0 ))
         this.renderer = new THREE.WebGLRenderer();
 		this.renderer.setPixelRatio( window.devicePixelRatio );
 		this.renderer.setSize( 1920, 800);
@@ -280,23 +286,57 @@ class DemoApp extends Component{
 
     threeDLayerMouseDown=(e)=>{
         let result = this.detectObjectSelectedOrNot(e)
-        if(result && this.state.selectedObjID === result.name)
+        if(result && this.state.selectedObjInfo.name === result.name)
         {
-            this.selectedObjectPaintedOrNot(result,false)
-        }
-        else if(result && this.state.selectedObjID !== result.name)
-        {
-            this.selectedObjectPaintedOrNot(result,true)
+            if(result.name === "plain1")
             {
-                this.setState({
-                    selectedObjID:result.name
-                })
+                this.selectedObjectPaintedOrNot(this.mesh1,false)                
             }
+            
+        }
+        else if(result && this.state.selectedObjInfo.name !== result.name)
+        {
+            if(result.name === "plain1")
+            {
+                this.selectedObjectPaintedOrNot(this.mesh1,true) 
+                this.selectedObjectPaintedOrNot(this.mesh2,false)
+            }
+            else
+            {
+                this.selectedObjectPaintedOrNot(this.mesh1,false) 
+                this.selectedObjectPaintedOrNot(this.mesh2,true)
+            }
+
+            let obj = {
+                name:result.name,
+                type:result.type,
+                position:{
+                    x:result.position.x,
+                    y:result.position.y,
+                    z:result.position.z
+                },
+                scale:{
+                    width:result.geometry.parameters.width,
+                    height:result.geometry.parameters.height,
+                    depth:result.geometry.parameters.depth?result.geometry.parameters.depth:0
+                }
+            }
+            
+            this.setState({
+                selectedObjInfo:obj
+            })         
         }
         else
         {
+            let obj = {
+                name:null,
+                type:null,
+                position:null,
+                scale:null
+            }
+
             this.setState({
-                selectedObjID:null
+                selectedObjInfo:obj
             })
         }
         console.log(result)
@@ -436,9 +476,7 @@ class DemoApp extends Component{
                         <RotationMenu rotationMesh1={this.state.rotationMesh1} rotationMesh2={this.state.rotationMesh2} returnRotation={this.returnRotation}/>          
                     </DnDContainer>
                     <DnDContainer containerTabTitle={"Obj Info"} containerID={5} boxID={'D'}>
-                        <div>
-                            {"info"}
-                        </div>
+                        <SelectedObjInfo selectedObjInfo={this.state.selectedObjInfo}/>       
                     </DnDContainer>
                 
                 </DnDLayout>
