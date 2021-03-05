@@ -38,7 +38,8 @@ class DemoApp extends Component{
                 type:null,
                 position:null,
                 scale:null
-            }
+            },
+            showContainer:null,
         }
     }
 
@@ -277,6 +278,16 @@ class DemoApp extends Component{
         }	
     }
 
+    showContainerClick=()=>{
+        this.setState({
+            showContainer:[1,2,3,4,5]
+        },()=>{
+            this.setState({
+                showContainer:null
+            })
+        })
+    }
+
     threeDLayerMouseDown=(e)=>{
         //e.preventDefault()
         //e.stopPropagation()
@@ -330,6 +341,9 @@ class DemoApp extends Component{
                 scale:null
             }
 
+            this.selectedObjectPaintedOrNot(this.mesh1,false) 
+            this.selectedObjectPaintedOrNot(this.mesh2,false)
+
             this.setState({
                 selectedObjInfo:obj
             })
@@ -375,9 +389,7 @@ class DemoApp extends Component{
         }
     }
 
-    sideOnClick=()=>{
-        console.log("frontView be clicked !")
-    }
+    
 
     getBoxesState=(msg)=>{
         if(this.frontView)
@@ -449,7 +461,11 @@ class DemoApp extends Component{
         ]
 
         return(
-            <div ref={(mainBody)=>{this.mainBody = mainBody}} style={{border:"1px solid black"}}  onMouseDown={this.threeDLayerMouseDown}>
+            <div ref={(mainBody)=>{this.mainBody = mainBody}} style={{width:'100%',height:'100%',borderTop:"1px solid black", borderBottom:"1px solid black"}}  onMouseDown={this.threeDLayerMouseDown}>
+                <div style={{width:1000,height:50,left:100,position:'absolute',padding:10}}>
+                    <button style={{float:'left',height:50}} onClick={this.showContainerClick}>Show Default DnDContainer</button>
+                    <div style={{width:350, lineHeight:'50px', float:'right'}}>{"dnd-box demo : used in CAD like application"}</div>
+                </div>
                 <DnDLayout backgroundColor={'pink'} width={1920} height={800} boxColor={''} boxHeaderColor={''} boxTabColor={''} boxHeaderHoverColor={''} boxTabHoverColor={''} boxTabSelectedColor={''} iconHoverColor={''} boxTabRadius={'0px 10px 0px 0px'} boxesSetting={boxesSetting} openContainer={this.state.showContainer}  tabHeight={25} getBoxesState={this.getBoxesState}>
                     <DnDBackgroundComponent>
                         <div ref={(mount) => { this.mount = mount }}>
@@ -467,13 +483,12 @@ class DemoApp extends Component{
                         <div style={{width:'100%',height:'100%',overflow:'hidden'}} ref={(topView) => { this.topView = topView }}>                                 
                         </div>
                     </DnDContainer>
-                    <DnDContainer containerTabTitle={"Rotation Speed"} containerID={3} boxID={'D'}>             
+                    <DnDContainer containerTabTitle={"Rotation Speed"} containerID={4} boxID={'D'}>             
                         <RotationMenu rotationMesh1={this.state.rotationMesh1} rotationMesh2={this.state.rotationMesh2} returnRotation={this.returnRotation}/>          
                     </DnDContainer>
                     <DnDContainer containerTabTitle={"Obj Info"} containerID={5} boxID={'D'}>
                         <SelectedObjInfo selectedObjInfo={this.state.selectedObjInfo}/>       
-                    </DnDContainer>
-                
+                    </DnDContainer>        
                 </DnDLayout>
             </div>
         )
